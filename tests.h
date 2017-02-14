@@ -4,6 +4,8 @@
 #include "gtest/gtest.h"
 #include "deque.h"
 
+
+#include <algorithm>
 #include <vector>
 #include <queue>
 #include <ctime>
@@ -11,9 +13,8 @@
 
 using std::vector;
 using std::pair;
-using Deque::operator+;
 
-const int COUNT_ELEMENTS = 10000;
+const int COUNT_ELEMENTS = 1 << 13;
 const double timeO1 = 6 * 1e-06;
 
 inline double currentTime() {
@@ -45,7 +46,8 @@ class Checker : public ::testing::Test{
     double alltime, t_time;
 public:
     vector <size_t> array;
-    Deque::Deque <size_t> *deq;
+    Deque <size_t> *deq;
+    Deque <size_t> *deq2;
     void timeOperationStart(){
         t_time = currentTime();
     }
@@ -61,16 +63,16 @@ public:
         for (size_t i = 0; i < array.size(); ++i)
             deq->push_back(array[i]);
     }
-    void fillDeque(){
-        for (size_t i = 0; i < COUNT_ELEMENTS; ++i)
+    void fillDeque(size_t count = COUNT_ELEMENTS){
+        for (size_t i = 0; i < count; ++i)
             deq->push_back(rand() % ULLONG_MAX);
     }
     void randomPushAndPop(){
-        size_t countOperations = rand() % 500;
+        size_t countOperations = rand() % 401  + 100;
         size_t frontOrBack; //1 - front, 0 - back
         size_t pushOrPop; //1 - push, 0 - pop
         for (size_t i = 0, value; i < countOperations; ++i){
-            pushOrPop = (!deq->size() ? 1 : (deq->size() == COUNT_ELEMENTS ? 0 : rand() % 2));
+            pushOrPop = (deq->size() < 100 ? 1 : (deq->size() == COUNT_ELEMENTS ? 0 : rand() % 2));
             frontOrBack = rand() % 2;
             size_t temp = (pushOrPop << 1) + frontOrBack;
             switch (temp){
@@ -103,7 +105,7 @@ public:
 protected:
     void SetUp(){
         alltime = t_time = 0;
-        deq = new Deque::Deque <size_t>();
+        deq = new Deque <size_t>();
     }
     void TearDown(){
         delete deq;
@@ -113,7 +115,7 @@ protected:
 class PairChecker : public ::testing::Test{
     double alltime, t_time;
 public:
-    Deque::Deque <std::pair<size_t, size_t>> *deq;
+    Deque<std::pair<size_t, size_t>> *deq;
     void timeOperationStart(){
         t_time = currentTime();
     }
@@ -132,7 +134,7 @@ public:
 protected:
     void SetUp(){
         alltime = t_time = 0;
-        deq = new Deque::Deque <std::pair<size_t, size_t>>();
+        deq = new Deque <std::pair<size_t, size_t>>();
     }
     void TearDown(){
         delete deq;
@@ -140,89 +142,97 @@ protected:
 };
 
 
-TEST_F(Checker, PushFront){
-    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
-        timeOperationStart();
-        deq->push_front(rand() % ULLONG_MAX);
-        timeOperationEnd();
-    }
-    ASSERT_EQ(deq->size(), COUNT_ELEMENTS);
-    ASSERT_LE(getAlltimeOperations() / COUNT_ELEMENTS, timeO1);
-}
-TEST_F(Checker, PushBack){
-    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
-        timeOperationStart();
-        deq->push_back(rand() % ULLONG_MAX);
-        timeOperationEnd();
-    }
-    ASSERT_EQ(deq->size(), COUNT_ELEMENTS);
-    ASSERT_LE(getAlltimeOperations() / COUNT_ELEMENTS, timeO1);
-}
 
-TEST_F(Checker, PopFront){
-    fillDeque();
-    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
-        timeOperationStart();
-        deq->pop_front();
-        timeOperationEnd();
-    }
-    ASSERT_EQ(deq->size(), 0);
-    ASSERT_LE(getAlltimeOperations() / COUNT_ELEMENTS, timeO1);
-}
-TEST_F(Checker, PopBack){
-    fillDeque();
-    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
-        timeOperationStart();
-        deq->pop_back();
-        timeOperationEnd();
-    }
-    ASSERT_EQ(deq->size(), 0);
-    ASSERT_LE(getAlltimeOperations() / COUNT_ELEMENTS, timeO1);
-}
-
-TEST_F(Checker, PushAndPopFrontAndBack){
-    size_t frontOrBack; //1 - front, 0 - back
-    size_t pushOrPop; //1 - push, 0 - pop
-    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
-        pushOrPop = (!deq->size() ? 1 : (deq->size() == COUNT_ELEMENTS ? 0 : rand() % 2));
-        frontOrBack = rand() % 2;
-        size_t temp = (pushOrPop << 1) + frontOrBack;
-        switch (temp){
-            case 0:
-                timeOperationStart();
-                deq->pop_back();
-                timeOperationEnd();
-                break;
-            case 1:
-                timeOperationStart();
-                deq->pop_front();
-                timeOperationEnd();
-                break;
-            case 2:
-                timeOperationStart();
-                deq->push_back(rand() % ULLONG_MAX);
-                timeOperationEnd();
-                break;
-            case 3:
-                timeOperationStart();
-                deq->push_front(rand() % ULLONG_MAX);
-                timeOperationEnd();
-                break;
-            default:
-                ASSERT_TRUE(true);
-                break;
-        }
-    }
-    ASSERT_LE(getAlltimeOperations() /COUNT_ELEMENTS, timeO1);
-}
+//TEST_F(Checker, FrontPushFront){
+//    size_t temp;
+//    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
+//        temp = rand() % ULLONG_MAX;
+//        timeOperationStart();
+//        deq->push_front(temp);
+//        timeOperationEnd();
+//        ASSERT_EQ(temp, deq->front());
+//    }
+//    ASSERT_EQ(deq->size(), COUNT_ELEMENTS);
+//    ASSERT_LE(getAlltimeOperations() / COUNT_ELEMENTS, timeO1);
+//}
+//TEST_F(Checker, BackPushBack){
+//    size_t temp;
+//    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
+//        temp = rand() % ULLONG_MAX;
+//        timeOperationStart();
+//        deq->push_back(temp);
+//        timeOperationEnd();
+//        ASSERT_EQ(temp, deq->back());
+//    }
+//    ASSERT_EQ(deq->size(), COUNT_ELEMENTS);
+//    ASSERT_LE(getAlltimeOperations() / COUNT_ELEMENTS, timeO1);
+//}
+//TEST_F(Checker, PopFront){
+//    fillDeque();
+//    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
+//        timeOperationStart();
+//        deq->pop_front();
+//        timeOperationEnd();
+//    }
+//    ASSERT_EQ(deq->size(), 0);
+//    ASSERT_LE(getAlltimeOperations() / COUNT_ELEMENTS, timeO1);
+//}
+//TEST_F(Checker, PopBack){
+//    fillDeque();
+//    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
+//        timeOperationStart();
+//        deq->pop_back();
+//        timeOperationEnd();
+//    }
+//    ASSERT_EQ(deq->size(), 0);
+//    ASSERT_LE(getAlltimeOperations() / COUNT_ELEMENTS, timeO1);
+//}
+//
+//TEST_F(Checker, PushAndPopFrontAndBack){
+//    size_t frontOrBack; //1 - front, 0 - back
+//    size_t pushOrPop; //1 - push, 0 - pop
+//    for (size_t i = 0; i < COUNT_ELEMENTS; ++i){
+//        pushOrPop = (!deq->size() ? 1 : (deq->size() == COUNT_ELEMENTS ? 0 : rand() % 2));
+//        frontOrBack = rand() % 2;
+//        size_t temp = (pushOrPop << 1) + frontOrBack;
+//        switch (temp){
+//            case 0:
+//                timeOperationStart();
+//                deq->pop_back();
+//                timeOperationEnd();
+//                break;
+//            case 1:
+//                timeOperationStart();
+//                deq->pop_front();
+//                timeOperationEnd();
+//                break;
+//            case 2:
+//                timeOperationStart();
+//                deq->push_back(rand() % ULLONG_MAX);
+//                timeOperationEnd();
+//                break;
+//            case 3:
+//                timeOperationStart();
+//                deq->push_front(rand() % ULLONG_MAX);
+//                timeOperationEnd();
+//                break;
+//            default:
+//                ASSERT_TRUE(true);
+//                break;
+//        }
+//    }
+//    ASSERT_LE(getAlltimeOperations() /COUNT_ELEMENTS, timeO1);
+//}
 TEST_F(Checker, ConstOperatorSquareBraces){
+    fillVectorDifference(array);
+    fillDeque(array);
     randomPushAndPop();
     size_t temp;
     for (size_t i = 0; i < deq->size(); ++i) {
         timeOperationStart();
-        temp = (*deq)[i];
+        (*deq)[i];
         timeOperationEnd();
-        ASSERT_EQ(array[i], temp) << "bad values";
+        ASSERT_EQ(array[i], (*deq)[i]) << "bad values";
     }
     ASSERT_LE(getAlltimeOperations() / deq->size(), timeO1);
 }
@@ -241,10 +251,11 @@ TEST_F(Checker, OperatorSquareBraces){
     ASSERT_LE(getAlltimeOperations() / countAssigment, timeO1);
 }
 
+
 TEST_F(Checker, DequeIteratorBegin){
     fillVectorDifference(array);
     fillDeque(array);
-    Deque::Deque<size_t>::iterator it;
+    Deque<size_t>::iterator it;
     for (size_t i = 0; i < array.size(); ++i){
         timeOperationStart();
         it = deq->begin();
@@ -258,7 +269,7 @@ TEST_F(Checker, DequeIteratorBegin){
 TEST_F(Checker, DequeIteratorEquival){
     fillVectorDifference(array);
     fillDeque(array);
-    Deque::Deque<size_t>::iterator it;
+    Deque<size_t>::iterator it;
     bool resultRelation;
     for (size_t i = 0; i < array.size(); ++i){
         it = deq->begin();
@@ -272,9 +283,9 @@ TEST_F(Checker, DequeIteratorEquival){
 
 TEST_F(Checker, DequeIteratorLoop){
     fillDeque();
-    Deque::Deque<size_t>::iterator tempFPost, FrontPostfix, tempFPre,
+    Deque<size_t>::iterator tempFPost, FrontPostfix, tempFPre,
             FrontPrefix = FrontPostfix = deq->begin();
-    Deque::Deque<size_t>::iterator tempBPost, BackPostfix, tempBPre,
+    Deque<size_t>::iterator tempBPost, BackPostfix, tempBPre,
             BackPrefix = BackPostfix = deq->end();
     for (size_t i = 0; i < deq->size(); ++i){
         timeOperationStart();
@@ -295,7 +306,7 @@ TEST_F(Checker, DequeIteratorLoop){
 TEST_F(Checker, DequeIteratorPlus){
     fillVectorDifference(array);
     fillDeque(array);
-    Deque::Deque<size_t>::iterator NumberIterator, IteratorNumber, it;
+    Deque<size_t>::iterator NumberIterator, IteratorNumber, it;
     for (size_t i = 0; i <= array.size(); ++i){
         timeOperationStart();
         NumberIterator = i + deq->begin();
@@ -312,19 +323,25 @@ TEST_F(Checker, DequeIteratorPlus){
 
 TEST_F(Checker, DequeIteratorMinusIterator){
     fillDeque();
-    Deque::Deque<size_t>::iterator it = deq->begin();
-    ssize_t difference;
+    Deque<size_t>::iterator it = deq->begin();
+    ssize_t difference1, difference2, difference3, difference4;
     for (ssize_t i = 0; i < deq->size(); ++i, ++it){
         timeOperationStart();
-        difference = it - (deq->begin() + deq->size() / 2);
+        difference1 = it - deq->begin();
+        difference2 = deq->begin() - it;
+        difference3 = it - deq->end();
+        difference4 = deq->end() - it;
         timeOperationEnd();
-        ASSERT_EQ(difference, i - deq->size() / 2);
+        ASSERT_EQ(difference1, i);
+        ASSERT_EQ(difference2, -i);
+        ASSERT_EQ(difference3, i - ssize_t(deq->size()));
+        ASSERT_EQ(difference4, deq->size() - i);
     }
-    ASSERT_LE(getAlltimeOperations() / deq->size(), timeO1);
+    ASSERT_LE(getAlltimeOperations() / (deq->size() * 4), timeO1);
 }
 TEST_F(Checker, DequeIteratorMinusNumber){
     fillDeque();
-    Deque::Deque<size_t>::iterator IteratorNumber, it;
+    Deque<size_t>::iterator IteratorNumber, it;
     for (size_t i = 0; i <= deq->size(); ++i){
         timeOperationStart();
         IteratorNumber = deq->end() - i;
@@ -337,7 +354,7 @@ TEST_F(Checker, DequeIteratorMinusNumber){
 TEST_F(Checker, DequeIteratorMinusPlusEqually){
     fillDeque();
     for(size_t i = 0; i < deq->size(); ++i){
-        Deque::Deque<size_t>::iterator itBegin, itEnd;
+        Deque<size_t>::iterator itBegin, itEnd;
         itBegin = deq->begin();
         itEnd = deq->end();
         timeOperationStart();
@@ -350,33 +367,43 @@ TEST_F(Checker, DequeIteratorMinusPlusEqually){
     ASSERT_LE(getAlltimeOperations() / (deq->size() * 2), timeO1);
 }
 
-TEST_F(Checker, DequeIteratorRelations){
-    fillDeque();
-    bool GT, GE, LT, LE;
-    Deque::Deque<size_t>::iterator it = deq->begin(), temp1, temp2;
-    for (size_t i = 0; i < deq->size(); ++i){
-        for (size_t j = i; j < deq->size(); ++j){
-            temp1 = it + i;
-            temp2 = it + j;
-            timeOperationStart();
-            GT = temp1 > temp2;
-            LT = temp1 < temp2;
-            GE = temp1 >= temp2;
-            LE = temp1 <= temp2;
-            timeOperationEnd();
-            ASSERT_EQ(GT, i > j);
-            ASSERT_EQ(LT, i < j);
-            ASSERT_EQ(GE, i >= j);
-            ASSERT_EQ(LE, i <= j);
-        }
-    }
-    ASSERT_LE(getAlltimeOperations() / (deq->size() * (deq->size() + 1) / 2), timeO1);
+TEST_F(Checker, Size){
+    size_t size_ = rand()% (COUNT_ELEMENTS / 2 + 1) + COUNT_ELEMENTS / 2;
+    fillDeque(size_);
+    timeOperationStart();
+    deq->size();
+    timeOperationEnd();
+    ASSERT_EQ(size_, deq->size());
+    ASSERT_LE(getAlltimeOperations(), timeO1);
 }
+
+//TEST_F(Checker, DequeIteratorRelations){
+//    fillDeque();
+//    bool GT, GE, LT, LE;
+//    Deque<size_t>::iterator it = deq->begin(), temp1, temp2;
+//    for (size_t i = 0; i < deq->size(); ++i){
+//        for (size_t j = i; j < deq->size(); ++j){
+//            temp1 = it + i;
+//            temp2 = it + j;
+//            timeOperationStart();
+//            GT = temp1 > temp2;
+//            LT = temp1 < temp2;
+//            GE = temp1 >= temp2;
+//            LE = temp1 <= temp2;
+//            timeOperationEnd();
+//            ASSERT_EQ(GT, i > j);
+//            ASSERT_EQ(LT, i < j);
+//            ASSERT_EQ(GE, i >= j);
+//            ASSERT_EQ(LE, i <= j);
+//        }
+//    }
+//    ASSERT_LE(getAlltimeOperations() / (deq->size() * (deq->size() + 1) / 2), timeO1);
+//}
 
 TEST_F(Checker, DequeIteratorDereference){
     fillVector(array);
     fillDeque(array);
-    Deque::Deque<size_t>::iterator it = deq->begin();
+    Deque<size_t>::iterator it = deq->begin();
     for (size_t i = 0; i < deq->size(); ++i, ++it){
         timeOperationStart();
         *it;
@@ -389,19 +416,27 @@ TEST_F(Checker, DequeIteratorDereference){
 TEST_F(Checker, DequeIteratorOperatorSquareBraces){
     fillVector(array);
     fillDeque(array);
-    Deque::Deque<size_t>::iterator it = deq->begin();
+    randomPushAndPop();
+    Deque<size_t>::iterator it = deq->begin();
     for (size_t i = 0; i < deq->size(); ++i){
         timeOperationStart();
         it[i];
         timeOperationEnd();
         ASSERT_EQ(it[i], array[i]);
     }
-    ASSERT_LE(getAlltimeOperations() / deq->size(), timeO1);
+    Deque<size_t>::reverse_iterator rit = deq->rbegin();
+    for (size_t i = 0; i < deq->size(); ++i){
+        timeOperationStart();
+        rit[i];
+        timeOperationEnd();
+        ASSERT_EQ(rit[i], array[array.size() - 1 - i]);
+    }
+    ASSERT_LE(getAlltimeOperations() / deq->size() * 0.5, timeO1);
 }
 
 TEST_F(PairChecker, DequeIteratorRefDereference){
     fillDeque();
-    Deque::Deque<std::pair<size_t, size_t>>::iterator it = deq->begin();
+    Deque<std::pair<size_t, size_t>>::iterator it = deq->begin();
     for (size_t i = 0; i < deq->size(); ++i, ++it){
         timeOperationStart();
         it->first;
@@ -411,6 +446,9 @@ TEST_F(PairChecker, DequeIteratorRefDereference){
     }
     ASSERT_LE(getAlltimeOperations() / deq->size(), timeO1);
 }
+
+
+
 
 
 

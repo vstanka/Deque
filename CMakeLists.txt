@@ -11,7 +11,7 @@ link_libraries(pthread)
 link_libraries(gtest)
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 set(SOURCE_FILES deque.h tests.h main.cpp)
 add_executable(Deque ${SOURCE_FILES})
