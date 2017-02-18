@@ -69,7 +69,7 @@ std::string random(){
     return s;
 };
 
-const size_t CHECK_SIZE = 1000;
+const size_t CHECK_SIZE = 1024;
 
 template <class value>
 class CheckerTest : public ::testing::Test{
@@ -78,7 +78,9 @@ protected:
     vector <operation> opers;
     deque <value> deq;
     Deque <value> Deq;
+
 public:
+    typename Deque<value>::iterator Diterator;
     CheckerTest(){}
 
     void check(){
@@ -257,6 +259,17 @@ TYPED_TEST(CheckerTest, NonConstSquarBraces){
         this->changeValue(rand() % this->deq.size(), random<TypeParam>());
     }
     this->check();
+}
+
+TYPED_TEST(CheckerTest, BeginEnd){
+    this->RandomPushPop();
+    for (size_t i = 0; i < this->deq.size(); ++i){
+        ASSERT_EQ(this->deq.rbegin() - this->deq.rend(), this->Deq.rbegin() - this->Deq.rend());
+        ASSERT_EQ(this->deq.rend() - this->deq.rbegin(), this->Deq.rend() - this->Deq.rbegin());
+        ASSERT_EQ(this->deq.begin() - this->deq.end(), this->Deq.begin() - this->Deq.end());
+        ASSERT_EQ(this->deq.end() - this->deq.begin(), this->Deq.end() - this->Deq.begin());
+        this->RandomPop();
+    }
 }
 
 

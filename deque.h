@@ -93,34 +93,34 @@ public:
     }
 
     void push_front(crvalue elem){
-        reallocate();
         ++size_;
         front_ += capacity_ - 1;
         front_ %= capacity_;
         array[front_] = elem;
+        reallocate();
     }
     void push_back(crvalue elem){
-        reallocate();
         ++size_;
         array[back_] = elem;
         ++back_;
         back_ %= capacity_;
+        reallocate();
     }
     void pop_front(){
-        reallocate();
         if (empty())
             return;
         --size_;
         ++front_;
         front_ %= capacity_;
+        reallocate();
     }
     void pop_back(){
-        reallocate();
         if (empty())
             return;
         --size_;
         back_ += capacity_ - 1;
         back_ %= capacity_;
+        reallocate();
     }
 
     value &front(){
@@ -154,7 +154,6 @@ public:
     crvalue operator[](ssize_t i) const{
         return array[(ssize_t(front_) + i % ssize_t(capacity_)) % capacity_];
     }
-///
     iterator begin(){
         return iterator(this, front_);
     }
@@ -168,7 +167,6 @@ public:
     const_iterator cend() const {
         return const_iterator(this, back_);
     }
-    ///
     const_iterator begin() const {
         return cbegin();
     }
@@ -205,7 +203,7 @@ struct DequeIterator : public std::iterator <std::random_access_iterator_tag, va
     typedef const Deque <value_type> DequeType;
     typedef ssize_t difference_type;
     typedef DequeIterator <value_type, pointer, reference> DequeIteratorType;
-    typedef const DequeIteratorType &crefDequeIteratorType;
+    typedef const DequeIteratorType& crefDequeIteratorType;
     DequeType *deq;
     ssize_t index;
 public:
@@ -258,7 +256,6 @@ public:
     DequeIteratorType operator-(ssize_t i) const {
         return DequeIteratorType(*this) -= i;
     }
-    ///////////
 
     difference_type operator-(crefDequeIteratorType deqIter) const {
         //if (this->deq != deqIter.deq) {throw();}
