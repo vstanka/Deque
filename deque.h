@@ -349,7 +349,7 @@ public:
 
 template <typename value_type, typename pointer, typename reference>
 DequeIterator <value_type, pointer, reference>
-operator+(ullint i, DequeIterator <value_type, pointer, reference> deqIter){
+operator+(llint i, DequeIterator <value_type, pointer, reference> deqIter){
     return deqIter + i;
 }
 
