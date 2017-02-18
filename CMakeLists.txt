@@ -13,7 +13,11 @@ link_libraries(gtest)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-set(SOURCE_FILES deque.h tests.h main.cpp)
+set(SOURCE_FILES
+        #deque.h
+        Denis_Tests.h
+        tests.h main.cpp deque.h
+        GostkinTests.h)
 add_executable(Deque ${SOURCE_FILES})
 
 target_link_libraries(Deque pthread gtest)
